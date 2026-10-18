@@ -1,0 +1,1531 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eğitim Analiz & Yönetim Portalı (EduPort)</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        tpmor: {
+                            DEFAULT: '#4C3193',
+                            50: '#f5f3fa',
+                            100: '#e8e4f3',
+                            200: '#d1c9e8',
+                            600: '#5c3cb3',
+                            700: '#4C3193',
+                            800: '#3A2673',
+                            900: '#2A1A56',
+                            950: '#1D123D',
+                        },
+                        tppembe: {
+                            DEFAULT: '#FF0082',
+                            50: '#fff0f6',
+                            100: '#ffe0ed',
+                            500: '#FF0082',
+                            600: '#e00072',
+                            700: '#b8005e',
+                        },
+                        tplavanta: {
+                            DEFAULT: '#706297',
+                            50: '#f5f4f8',
+                            100: '#ece9f3',
+                            200: '#d9d3e7',
+                            600: '#706297',
+                            700: '#5a4d7c',
+                        },
+                        tpgri: {
+                            DEFAULT: '#848DAC',
+                            50: '#f8f9fc',
+                            100: '#f1f3f7',
+                            200: '#e2e5ee',
+                            300: '#cbd1e0',
+                            500: '#848DAC',
+                            700: '#5c6480',
+                            900: '#2e354f',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body, input, select, button, textarea, table {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        /* Active Navigation Tab Style matching RoomSpace Header Reference */
+        .header-tab-btn.active {
+            background-color: #2A1A56;
+            color: #ffffff;
+            border: 2px solid #FF0082;
+            box-shadow: 0 0 14px rgba(255, 0, 130, 0.4);
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.35; transform: scale(0.85); }
+        }
+        .live-pulse {
+            animation: pulse-dot 1.8s infinite ease-in-out;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f3f7;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #848DAC;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-[#F3F2F7] text-slate-800 min-h-screen flex flex-col antialiased selection:bg-tppembe selection:text-white">
+
+    <!-- TOP CORPORATE HEADER WITH INTEGRATED NAVIGATION (ROOMSPACE INSPIRED) -->
+    <header class="bg-gradient-to-r from-[#281A4E] via-[#3B2673] to-[#4C3193] text-white shadow-xl flex-shrink-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-3">
+            
+            <!-- Header Top Row -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
+                
+                <!-- Brand Title & Tagline -->
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="text-3xl font-black text-white tracking-tight">Edu<span class="text-tppembe">Port</span></span>
+                    </div>
+                    
+                    <!-- Vertical TP Pink Accent Line -->
+                    <div class="h-9 w-1 bg-tppembe rounded-full shadow-[0_0_8px_rgba(255,0,130,0.6)]"></div>
+
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold text-white tracking-wide leading-tight">
+                            Eğitim Analiz & Takip <span class="font-black uppercase text-tppembe-100">PORTALI</span>
+                        </h1>
+                        <p class="text-xs text-tpgri-200">
+                            Eğitmen takvimi, tarih bazlı oturumlar, katılımcı kayıtları ve çoklu kampüs analitiği.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Top Right Live Sync Controls & User Profile -->
+                <div class="flex items-center flex-wrap gap-2.5">
+                    <!-- Live Cloud Connection Indicator -->
+                    <div class="bg-tpmor-950/80 border border-emerald-400/40 px-3 py-1.5 rounded-full flex items-center space-x-2 shadow-inner">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 live-pulse"></span>
+                        <span class="text-[11px] font-bold text-emerald-300 uppercase tracking-wider">CANLI BULUT</span>
+                        <span id="lastSyncTime" class="text-[10px] text-tpgri-300 font-mono pl-1 border-l border-white/20">--:--:--</span>
+                    </div>
+
+                    <!-- Sync Now Button -->
+                    <button onclick="fetchCloudData(true)" title="Verileri Şimdi Yenile" class="bg-tpmor-800 hover:bg-tpmor-700 text-white text-xs font-bold px-3 py-1.5 rounded-full border border-tpmor-600 transition flex items-center gap-1.5">
+                        <span id="syncIcon" class="material-symbols-outlined text-sm">sync</span>
+                        <span>Şimdi Yenile</span>
+                    </button>
+
+                    <!-- Quick Paste Modal Trigger (Zero File Upload) -->
+                    <button onclick="openModal('quickPasteModal')" title="Tablodan Kopyala Yapıştır" class="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-1.5 rounded-full border border-white/25 transition flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm">content_paste</span>
+                        <span>Tablodan Yapıştır</span>
+                    </button>
+
+                    <!-- Cloud / API Settings Modal Trigger -->
+                    <button onclick="openModal('apiConfigModal')" class="bg-tppembe hover:bg-tppembe-600 text-white text-xs font-bold px-3.5 py-1.5 rounded-full shadow-md shadow-tppembe/30 transition flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-sm">link</span>
+                        <span>Google E-Tablo Linki</span>
+                    </button>
+
+                    <!-- User Profile Badge -->
+                    <div class="hidden lg:flex items-center bg-white/10 text-white text-xs px-3 py-1.5 rounded-full border border-white/20 font-medium">
+                        <span class="w-2 h-2 rounded-full bg-tppembe mr-2"></span>
+                        <span>Gamze Güneş · <strong>YÖNETİCİ</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs Bar -->
+            <div class="flex items-center space-x-2 overflow-x-auto pt-2 pb-1 scrollbar-none">
+                <button onclick="switchTab('overview')" id="nav-overview" class="header-tab-btn active px-4 py-2 rounded-xl text-xs font-semibold transition whitespace-nowrap flex items-center space-x-1.5 text-tpgri-200 hover:text-white">
+                    <span class="material-symbols-outlined text-base">dashboard</span>
+                    <span>Genel Bakış & KPI</span>
+                </button>
+
+                <button onclick="switchTab('sessions')" id="nav-sessions" class="header-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition whitespace-nowrap flex items-center space-x-1.5 text-tpgri-200 hover:text-white">
+                    <span class="material-symbols-outlined text-base">calendar_month</span>
+                    <span>Eğitmen & Oturum Takvimi</span>
+                </button>
+
+                <button onclick="switchTab('trainers')" id="nav-trainers" class="header-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition whitespace-nowrap flex items-center space-x-1.5 text-tpgri-200 hover:text-white">
+                    <span class="material-symbols-outlined text-base">badge</span>
+                    <span>Eğitmen Performans Matrisi</span>
+                </button>
+
+                <button onclick="switchTab('projects')" id="nav-projects" class="header-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition whitespace-nowrap flex items-center space-x-1.5 text-tpgri-200 hover:text-white">
+                    <span class="material-symbols-outlined text-base">domain</span>
+                    <span>Proje & Lokasyon Analizi</span>
+                </button>
+
+                <button onclick="switchTab('participants')" id="nav-participants" class="header-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition whitespace-nowrap flex items-center space-x-1.5 text-tpgri-200 hover:text-white">
+                    <span class="material-symbols-outlined text-base">groups</span>
+                    <span>Tüm Katılımcılar & Kayıtlar</span>
+                </button>
+
+                <button onclick="switchTab('executive')" id="nav-executive" class="header-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition whitespace-nowrap flex items-center space-x-1.5 text-tpgri-200 hover:text-white">
+                    <span class="material-symbols-outlined text-base">description</span>
+                    <span>Yönetici Rapor Özeti</span>
+                </button>
+
+                <div class="ml-auto shrink-0 pl-4 hidden xl:flex items-center space-x-2">
+                    <span id="dataStatusIndicator" class="bg-tpmor-950/70 text-tppembe-100 text-[11px] px-3 py-1 rounded-full border border-tpmor-700">
+                        Canlı Veri Havuzu: Aktif
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- MAIN APPLICATION BODY -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+        <!-- DYNAMIC FILTER & SEARCH CONTROL PANEL -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="material-symbols-outlined text-tpmor text-xl">filter_alt</span>
+                    <div>
+                        <h3 id="panelSectionTitle" class="text-base font-bold text-tpmor">Filtreleme & Arama</h3>
+                        <p class="text-[11px] text-tpgri">Tüm eğitmenler, projeler, lokasyonlar ve tarihler üzerinde anlık dinamik filtreleme</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <span id="recordCountBadge" class="bg-tpmor-50 text-tpmor font-bold text-xs px-3 py-1 rounded-full border border-tpmor-100">0 Kayıt</span>
+                    <button onclick="resetFilters()" class="text-xs bg-tpgri-100 hover:bg-tpgri-200 text-tpgri-700 font-semibold py-1.5 px-3 rounded-xl flex items-center space-x-1 transition border border-tpgri-200">
+                        <span class="material-symbols-outlined text-sm">restart_alt</span>
+                        <span>Filtreleri Sıfırla</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 6-Column Responsive Filter Inputs -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+                <div>
+                    <label class="block font-bold text-tpgri uppercase tracking-wider mb-1">PROJE</label>
+                    <select id="filterProject" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-700 focus:ring-2 focus:ring-tppembe focus:outline-none">
+                        <option value="ALL">Tüm Projeler</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-tpgri uppercase tracking-wider mb-1">LOKASYON / KAMPÜS</label>
+                    <select id="filterLocation" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-700 focus:ring-2 focus:ring-tppembe focus:outline-none">
+                        <option value="ALL">Tüm Lokasyonlar</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-tpgri uppercase tracking-wider mb-1">EĞİTMEN</label>
+                    <select id="filterTrainer" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-700 focus:ring-2 focus:ring-tppembe focus:outline-none">
+                        <option value="ALL">Tüm Eğitmenler</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-tpgri uppercase tracking-wider mb-1">EĞİTİM ADI / TÜRÜ</label>
+                    <select id="filterTrainingType" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-700 focus:ring-2 focus:ring-tppembe focus:outline-none">
+                        <option value="ALL">Tüm Eğitimler</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-tpgri uppercase tracking-wider mb-1">SÖZLEŞME / KADRO</label>
+                    <select id="filterContract" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-700 focus:ring-2 focus:ring-tppembe focus:outline-none">
+                        <option value="ALL">Tüm Kadrolar</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-tpgri uppercase tracking-wider mb-1">TARİH / DÖNEM</label>
+                    <select id="filterDate" onchange="applyFilters()" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 font-medium text-slate-700 focus:ring-2 focus:ring-tppembe focus:outline-none">
+                        <option value="ALL">Tüm Tarihler</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Full-text Global Search Bar -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-1">
+                <div class="relative w-full sm:w-96">
+                    <span class="material-symbols-outlined absolute left-3 top-2.5 text-tpgri text-lg">search</span>
+                    <input type="text" id="globalSearchInput" oninput="applyFilters()" placeholder="Katılımcı adı, eğitmen, eğitim, proje veya tarih ara..." class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-xs font-medium focus:ring-2 focus:ring-tppembe focus:outline-none">
+                </div>
+                <div class="flex items-center space-x-2 text-xs text-tpgri-700 w-full sm:w-auto justify-end">
+                    <span class="material-symbols-outlined text-emerald-600 text-sm">verified</span>
+                    <span>Veriler merkezi Google Tablosu veya canlı bellekten çekilmektedir.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: GENEL BAKIŞ & KPI METRİKLERİ -->
+        <section id="sec-overview" class="space-y-6">
+            <!-- KPI Cards Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-tpmor/30 transition">
+                    <div>
+                        <p class="text-[11px] font-extrabold text-tpgri uppercase tracking-wider">Toplam Katılımcı</p>
+                        <h3 id="kpiTotalParticipants" class="text-3xl font-black text-tpmor mt-1">0</h3>
+                        <div class="flex flex-wrap gap-1.5 mt-2 text-xs" id="kpiContractBadges">
+                            <span class="bg-tpmor-50 text-tpmor font-bold px-2 py-0.5 rounded-lg border border-tpmor-100 text-[10px]">Bordro: 0</span>
+                            <span class="bg-tppembe-50 text-tppembe font-bold px-2 py-0.5 rounded-lg border border-tppembe-100 text-[10px]">İşkur: 0</span>
+                        </div>
+                    </div>
+                    <div class="w-12 h-12 bg-tpmor-50 rounded-2xl flex items-center justify-center text-tpmor shadow-inner">
+                        <span class="material-symbols-outlined text-2xl">groups</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-tpmor/30 transition">
+                    <div>
+                        <p class="text-[11px] font-extrabold text-tpgri uppercase tracking-wider">Açılan Oturum Sayısı</p>
+                        <h3 id="kpiTotalSessions" class="text-3xl font-black text-tpmor mt-1">0</h3>
+                        <p class="text-xs text-tpgri mt-2">Tarih Bazlı Farklı Sınıf</p>
+                    </div>
+                    <div class="w-12 h-12 bg-tplavanta-100/60 rounded-2xl flex items-center justify-center text-tplavanta shadow-inner">
+                        <span class="material-symbols-outlined text-2xl">calendar_month</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-tpmor/30 transition">
+                    <div>
+                        <p class="text-[11px] font-extrabold text-tpgri uppercase tracking-wider">Aktif Eğitmen Kadrosu</p>
+                        <h3 id="kpiActiveTrainers" class="text-3xl font-black text-tpmor mt-1">0</h3>
+                        <p class="text-xs text-tpgri mt-2">Eğitim Veren Eğitmen</p>
+                    </div>
+                    <div class="w-12 h-12 bg-tppembe-50 rounded-2xl flex items-center justify-center text-tppembe shadow-inner">
+                        <span class="material-symbols-outlined text-2xl">badge</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between hover:border-tpmor/30 transition">
+                    <div>
+                        <p class="text-[11px] font-extrabold text-tpgri uppercase tracking-wider">Ortalama Sınıf Hacmi</p>
+                        <h3 id="kpiAvgClassSize" class="text-3xl font-black text-tpmor mt-1">0</h3>
+                        <p class="text-xs text-tpgri mt-2">Katılımcı / Oturum Başına</p>
+                    </div>
+                    <div class="w-12 h-12 bg-tpgri-100 rounded-2xl flex items-center justify-center text-tpgri-700 shadow-inner">
+                        <span class="material-symbols-outlined text-2xl">equalizer</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Overview Charts Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-tpmor text-base">Eğitmen Bazında Katılımcı Dağılımı</h3>
+                            <p class="text-xs text-tpgri">Her eğitmenin eğittiği toplam kişi sayısı</p>
+                        </div>
+                        <span class="text-xs bg-tpmor-50 text-tpmor font-bold px-2.5 py-1 rounded-lg">Kişi Sayısı</span>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="chartTrainersOverview"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-tpmor text-base">Eğitim Konuları Kırılımı</h3>
+                            <p class="text-xs text-tpgri">Verilen tüm eğitim başlıklarının payı</p>
+                        </div>
+                        <span class="text-xs bg-tppembe-50 text-tppembe font-bold px-2.5 py-1 rounded-lg">Oranlar</span>
+                    </div>
+                    <div class="h-64">
+                        <canvas id="chartTrainingTypesOverview"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB 2: EĞİTMEN & OTURUM TAKVİMİ (Hangi Eğitmen, Hangi Tarihte, Kime Eğitim Verdi) -->
+        <section id="sec-sessions" class="hidden space-y-6">
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                    <div>
+                        <h3 class="font-bold text-tpmor text-lg flex items-center gap-2">
+                            <span class="material-symbols-outlined text-tppembe">event_note</span>
+                            <span>Eğitmen Oturumu & Katılımcı Karnesi</span>
+                        </h3>
+                        <p class="text-xs text-tpgri">Hangi tarihte, hangi eğitmenin, hangi projede ve hangi lokasyonda eğitim verdiğini ve sınıftaki katılımcı isimlerini gösterir.</p>
+                    </div>
+
+                    <div class="flex items-center space-x-2">
+                        <span id="sessionCountBadge" class="bg-tpmor-50 text-tpmor text-xs font-bold px-3 py-1 rounded-full border border-tpmor-100">0 Oturum Bulundu</span>
+                    </div>
+                </div>
+
+                <!-- Interactive Session Cards List -->
+                <div id="sessionCardsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                    <!-- Dynamic Session Cards will be injected here -->
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: EĞİTMEN PERFORMANS MATRİSİ -->
+        <section id="sec-trainers" class="hidden space-y-6">
+            <div id="trainerHighlightCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                <!-- Dynamic Trainer Summary Cards -->
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-tpmor text-base">Eğitmen & Eğitim Tipi Performans Matrisi</h3>
+                        <p class="text-xs text-tpgri">Her eğitmenin verdiği eğitim kategorileri, sınıf ve toplam katılımcı sayıları</p>
+                    </div>
+                    <button onclick="exportMatrixToCSV()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2 px-3.5 rounded-xl border border-slate-300 transition flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-base">download</span>
+                        <span>Matrisi İndir (CSV)</span>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead id="matrixTableHead" class="bg-slate-50 text-tpgri-700 font-bold border-b border-slate-200"></thead>
+                        <tbody id="matrixTableBody" class="divide-y divide-slate-100 font-medium text-slate-700"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: PROJE & LOKASYON ANALİZİ -->
+        <section id="sec-projects" class="hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-tpmor text-base">Tüm Projelerin Katılımcı Hacmi</h3>
+                            <p class="text-xs text-tpgri">AJet, Türk Hava Yolları, Vodafone, Sompo vb. tüm projeler</p>
+                        </div>
+                        <span class="text-xs bg-tppembe-50 text-tppembe font-bold px-2.5 py-1 rounded-lg">Katılımcı</span>
+                    </div>
+                    <div class="h-72">
+                        <canvas id="chartProjects"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h3 class="font-bold text-tpmor text-base">Tüm Lokasyon ve Kampüs Dağılımı</h3>
+                            <p class="text-xs text-tpgri">İstanbul (Flat, Nidakule), Gümüşhane, Balıkesir, Adana, İzmir, Diyarbakır...</p>
+                        </div>
+                        <span class="text-xs bg-tpmor-50 text-tpmor font-bold px-2.5 py-1 rounded-lg">Lokasyon</span>
+                    </div>
+                    <div class="h-72">
+                        <canvas id="chartLocations"></canvas>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- TAB 5: TÜM KATILIMCILAR & DETAYLI VERİ LİSTESİ -->
+        <section id="sec-participants" class="hidden space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                    <div>
+                        <h3 class="font-bold text-tpmor text-base">Detaylı Katılımcı & Eğitim Listesi</h3>
+                        <p class="text-xs text-tpgri">Katılımcı isimleri, görevli eğitmen, verilen eğitim adı, proje, lokasyon ve kesin tarih</p>
+                    </div>
+                    <button onclick="exportParticipantsToCSV()" class="text-xs bg-tpmor hover:bg-tpmor-800 text-white font-semibold py-2 px-3.5 rounded-xl transition shadow flex items-center space-x-1.5 self-start sm:self-auto">
+                        <span class="material-symbols-outlined text-base">download</span>
+                        <span>Listeyi Dışa Aktar (CSV)</span>
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto pt-3">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-slate-50 text-tpgri-700 font-bold uppercase tracking-wider border-b border-slate-200">
+                            <tr>
+                                <th class="p-3">Katılımcı Adı</th>
+                                <th class="p-3">Eğitmen</th>
+                                <th class="p-3">Eğitim Adı</th>
+                                <th class="p-3">Tarih</th>
+                                <th class="p-3">Proje</th>
+                                <th class="p-3">Lokasyon</th>
+                                <th class="p-3">Sözleşme / Kadro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="participantsTableBody" class="divide-y divide-slate-100 font-medium text-slate-700">
+                            <!-- Dynamic Table Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: YÖNETİCİ RAPOR ÖZETİ -->
+        <section id="sec-executive" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-tpmor">Yönetici Sunum & Canlı Rapor Metni</h3>
+                        <p class="text-xs text-tpgri">Filtrelenen eğitim ve eğitmen verileri doğrultusunda otomatik üretilen kurumsal özet</p>
+                    </div>
+                    <button onclick="copyExecutiveReport()" class="bg-tppembe hover:bg-tppembe-600 text-white text-xs font-semibold py-2 px-4 rounded-xl shadow transition flex items-center space-x-1.5">
+                        <span class="material-symbols-outlined text-base">content_copy</span>
+                        <span>Metni Kopyala</span>
+                    </button>
+                </div>
+
+                <div id="executiveReportContent" class="bg-slate-50 p-6 rounded-xl border border-slate-200 text-slate-700 text-sm leading-relaxed space-y-3 font-normal">
+                    <!-- Dynamic Report Content -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL 1: HIZLI TABLO YAPIŞTIRMA (SIFIR DOSYA YÜKLEME) -->
+    <div id="quickPasteModal" class="fixed inset-0 bg-tpmor-950/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="material-symbols-outlined text-tpmor text-2xl">content_paste</span>
+                    <div>
+                        <h3 class="font-bold text-tpmor text-base">E-Tablo'dan Hızlı Yapıştır (Sıfır Dosya)</h3>
+                        <p class="text-[11px] text-tpgri">Google Sheets veya Excel'deki satırları kopyalayıp buraya yapıştırın</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('quickPasteModal')" class="text-tpgri hover:text-slate-600">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-700">
+                <p class="text-slate-600">
+                    Google E-Tablonuzdaki verileri fareyle seçip <strong>Ctrl + C</strong> ile kopyalayın, ardından aşağıdaki kutucuğa <strong>Ctrl + V</strong> ile yapıştırın:
+                </p>
+
+                <textarea id="quickPasteInput" rows="7" placeholder="Katılımcı&#9;Eğitmen&#9;Eğitim Adı&#9;Proje&#9;Lokasyon&#9;Sözleşme&#9;Tarih&#10;Ahmet Yılmaz&#9;Gamze Güneş&#9;Oryantasyon&#9;AJet&#9;İstanbul&#9;Bordro&#9;01.09.2026..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-mono text-xs focus:ring-2 focus:ring-tppembe focus:outline-none"></textarea>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" onclick="closeModal('quickPasteModal')" class="bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded-xl">İptal</button>
+                    <button type="button" onclick="processQuickPastedData()" class="bg-tpmor hover:bg-tpmor-800 text-white font-semibold px-5 py-2 rounded-xl shadow flex items-center gap-1.5">
+                        <span class="material-symbols-outlined text-base">bolt</span>
+                        <span>Hemen Panele Aktar</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: BULUT & GOOGLE SHEETS API AYARLARI -->
+    <div id="apiConfigModal" class="fixed inset-0 bg-tpmor-950/70 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="material-symbols-outlined text-tpmor text-2xl">cloud_sync</span>
+                    <h3 class="font-bold text-tpmor text-base">Canlı Google E-Tablo Bağlantısı</h3>
+                </div>
+                <button onclick="closeModal('apiConfigModal')" class="text-tpgri hover:text-slate-600">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-700">
+                <p>
+                    Ortak Google E-Tablonuzun canlı web linkini buraya yapıştırın. Sistem 60 saniyede bir yeni eklenen satırları otomatik çeker.
+                </p>
+
+                <div>
+                    <label class="block font-bold text-tpgri uppercase tracking-wider mb-1">GOOGLE SHEETS YAYIN CSV LİNKİ</label>
+                    <input type="url" id="cloudApiUrlInput" placeholder="https://docs.google.com/spreadsheets/d/e/.../pub?output=csv" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-mono text-xs focus:ring-2 focus:ring-tppembe focus:outline-none">
+                </div>
+
+                <div class="bg-tpmor-50 p-3.5 rounded-xl border border-tpmor-100 space-y-1 text-slate-700">
+                    <p class="font-bold text-tpmor flex items-center gap-1">
+                        <span class="material-symbols-outlined text-sm text-tppembe">check_circle</span>
+                        <span>Bağlantı İpuçları:</span>
+                    </p>
+                    <p>E-Tablonuzda <strong>Dosya > Paylaş > Web'de Yayınla > Virgülle ayrılmış değerler (.csv)</strong> seçeneğini seçip linki kopyalayın.</p>
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button type="button" onclick="loadDefaultSeedData()" class="text-tpmor font-bold hover:underline">Örnek Verileri Yükle</button>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="closeModal('apiConfigModal')" class="bg-slate-200 text-slate-700 font-semibold px-4 py-2 rounded-xl">Kapat</button>
+                        <button type="button" onclick="saveCloudConfig()" class="bg-tpmor hover:bg-tpmor-800 text-white font-semibold px-4 py-2 rounded-xl shadow">Kaydet & Canlı Bağlan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: EĞİTMEN DETAY KARNESİ & KATILIMCILARI -->
+    <div id="trainerModal" class="fixed inset-0 bg-tpmor-950/60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-tr from-tpmor to-tppembe rounded-full flex items-center justify-center text-white font-bold text-xl shadow">
+                        <span class="material-symbols-outlined text-2xl">person</span>
+                    </div>
+                    <div>
+                        <h3 id="modalTrainerName" class="text-lg font-bold text-tpmor">Eğitmen Adı</h3>
+                        <p class="text-xs text-tpgri">Verilen Eğitimler & Katılımcı Detayları</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('trainerModal')" class="text-tpgri hover:text-slate-600">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <div id="modalTrainerBody" class="space-y-4 text-xs overflow-y-auto pr-1 flex-1">
+                <!-- Injected Trainer Details and Attending Participants -->
+            </div>
+
+            <div class="pt-2 text-right border-t border-slate-100">
+                <button onclick="closeModal('trainerModal')" class="bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold px-4 py-2 rounded-xl text-xs">Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // BRAND DESIGN TOKENS
+        const TP_COLORS = {
+            mor: '#4C3193',
+            pembe: '#FF0082',
+            lavanta: '#706297',
+            gri: '#848DAC',
+            morLight: '#e8e4f3',
+            pembeLight: '#ffe0ed',
+            palette: ['#4C3193', '#FF0082', '#706297', '#848DAC', '#3A2673', '#e00072', '#5c3cb3', '#2e354f']
+        };
+
+        // GLOBAL APPLICATION STATE
+        let allRecords = [];
+        let filteredRecords = [];
+        let chartInstances = {};
+        let activeCloudUrl = localStorage.getItem('eduport_cloud_api_url') || "";
+
+        // ROBUST DATA NORMALIZERS
+        function cleanField(val, fallback = '') {
+            if (val === undefined || val === null) return fallback;
+            const str = String(val).trim().replace(/^["']|["']$/g, '');
+            return str || fallback;
+        }
+
+        function cleanHeader(h) {
+            if (!h) return '';
+            return h.toString()
+                    .replace(/İ/g, 'i')
+                    .replace(/I/g, 'ı')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]/g, '');
+        }
+
+        // CSV LINE SPLITTER HANDLING DELIMITERS & QUOTES
+        function splitCSVLine(line, delim) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === delim && !inQuotes) {
+                    result.push(current.replace(/^["']|["']$/g, '').trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            result.push(current.replace(/^["']|["']$/g, '').trim());
+            return result;
+        }
+
+        // PARSE TABULAR TEXT (CSV / TSV / SPREADSHEET CLIPBOARD)
+        function parseTableText(text) {
+            const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+            if (lines.length <= 1) return [];
+
+            const firstLine = lines[0];
+            const tabCount = (firstLine.match(/\t/g) || []).length;
+            const semiCount = (firstLine.match(/;/g) || []).length;
+            const commaCount = (firstLine.match(/,/g) || []).length;
+
+            let delimiter = ',';
+            if (tabCount > semiCount && tabCount > commaCount) delimiter = '\t';
+            else if (semiCount > commaCount && semiCount > tabCount) delimiter = ';';
+
+            const headers = splitCSVLine(lines[0], delimiter).map(h => cleanHeader(h));
+
+            return lines.slice(1).map((line, idx) => {
+                const cols = splitCSVLine(line, delimiter);
+
+                const getCol = (keywords, defaultIndex) => {
+                    for (let kw of keywords) {
+                        const cKw = cleanHeader(kw);
+                        const found = headers.findIndex(h => h.includes(cKw));
+                        if (found !== -1 && cols[found] !== undefined && cols[found] !== '') {
+                            return cleanField(cols[found]);
+                        }
+                    }
+                    if (defaultIndex < cols.length && cols[defaultIndex]) {
+                        return cleanField(cols[defaultIndex]);
+                    }
+                    return '';
+                };
+
+                const participant = getCol(['katilimci', 'adsoyad', 'personel', 'isim', 'ogrenci', 'ad'], 0) || `Katılımcı ${idx+1}`;
+                const trainer = getCol(['egitmen', 'trainer', 'ogretmen', 'egitici'], 1) || 'Belirtilmedi';
+                const trainingType = getCol(['egitimadi', 'egitim', 'konu', 'tip', 'kurs'], 2) || 'Genel Eğitim';
+                const project = getCol(['proje', 'musteri', 'birim', 'departman'], 3) || 'Genel Proje';
+                const location = getCol(['lokasyon', 'kampus', 'sehir', 'ofis', 'yer'], 4) || 'İstanbul (Flat Ofis)';
+                const contract = getCol(['sozlesme', 'kadro', 'statuler', 'calismatipi'], 5) || 'Bordro';
+                const date = getCol(['tarih', 'zaman', 'gun', 'egitimtarihi'], 6) || '01.09.2026';
+
+                return {
+                    id: `REC-${idx+1}`,
+                    participant,
+                    trainer,
+                    trainingType,
+                    project,
+                    location,
+                    contract,
+                    date
+                };
+            });
+        }
+
+        // CLOUD FETCH WITH CORS PROXY FALLBACK
+        async function fetchCloudData(showToast = false) {
+            const syncIcon = document.getElementById('syncIcon');
+            if (syncIcon) syncIcon.classList.add('animate-spin');
+
+            try {
+                if (activeCloudUrl && activeCloudUrl.trim().startsWith('http')) {
+                    let rawData = "";
+
+                    // 1. Direct fetch
+                    try {
+                        const response = await fetch(activeCloudUrl);
+                        if (response.ok) {
+                            rawData = await response.text();
+                        }
+                    } catch (e) {
+                        console.warn("Doğrudan fetch engellendi, yedek köprü deneniyor...", e);
+                    }
+
+                    // 2. Fallback proxy
+                    if (!rawData || rawData.trim().length === 0) {
+                        const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(activeCloudUrl);
+                        const proxyRes = await fetch(proxyUrl);
+                        if (proxyRes.ok) {
+                            rawData = await proxyRes.text();
+                        }
+                    }
+
+                    if (!rawData || rawData.trim().length === 0) {
+                        throw new Error("Tablo içeriği okunamadı.");
+                    }
+
+                    const parsed = parseTableText(rawData);
+                    if (parsed && parsed.length > 0) {
+                        allRecords = parsed;
+                        localStorage.setItem('eduport_cached_records', JSON.stringify(allRecords));
+                        updateSyncTimestamp();
+                        populateDynamicDropdowns();
+                        applyFilters();
+
+                        if (showToast) {
+                            showNotification(`Google E-Tablo'dan ${allRecords.length} adet gerçek kayıt çekildi!`);
+                        }
+                        return;
+                    }
+                }
+
+                // If no URL or direct fetch failed, check cache
+                const cached = localStorage.getItem('eduport_cached_records');
+                if (cached) {
+                    allRecords = JSON.parse(cached);
+                } else {
+                    allRecords = generateRichSeedRecords();
+                }
+
+                updateSyncTimestamp();
+                populateDynamicDropdowns();
+                applyFilters();
+
+                if (showToast) {
+                    showNotification("Örnek eğitim oturumları ve katılımcı kayıtları yüklendi.");
+                }
+
+            } catch (err) {
+                console.error("Bulut Bağlantı Uyarısı:", err);
+                const cached = localStorage.getItem('eduport_cached_records');
+                allRecords = cached ? JSON.parse(cached) : generateRichSeedRecords();
+                populateDynamicDropdowns();
+                applyFilters();
+                if (showToast) {
+                    showNotification("Bağlantı kısıtlı olduğundan kayıtlar hafızadan açıldı.");
+                }
+            } finally {
+                if (syncIcon) syncIcon.classList.remove('animate-spin');
+            }
+        }
+
+        // QUICK CLIPBOARD PASTE HANDLER
+        function processQuickPastedData() {
+            const rawText = document.getElementById('quickPasteInput').value.trim();
+            if (!rawText) {
+                showNotification("Lütfen tablodan kopyaladığınız satırları yapıştırınız.");
+                return;
+            }
+
+            const parsed = parseTableText(rawText);
+            if (parsed.length === 0) {
+                showNotification("Satırlar ayrıştırılamadı. Lütfen başlıklarla birlikte yapıştırınız.");
+                return;
+            }
+
+            allRecords = parsed;
+            localStorage.setItem('eduport_cached_records', JSON.stringify(allRecords));
+            closeModal('quickPasteModal');
+            document.getElementById('quickPasteInput').value = '';
+
+            updateSyncTimestamp();
+            populateDynamicDropdowns();
+            applyFilters();
+            showNotification(`Tebrikler! ${allRecords.length} katılımcı kaydı anında sisteme aktarıldı!`);
+        }
+
+        function saveCloudConfig() {
+            const val = document.getElementById('cloudApiUrlInput').value.trim();
+            activeCloudUrl = val;
+            localStorage.setItem('eduport_cloud_api_url', val);
+            closeModal('apiConfigModal');
+            fetchCloudData(true);
+        }
+
+        function loadDefaultSeedData() {
+            document.getElementById('cloudApiUrlInput').value = "";
+            activeCloudUrl = "";
+            localStorage.removeItem('eduport_cloud_api_url');
+            allRecords = generateRichSeedRecords();
+            localStorage.setItem('eduport_cached_records', JSON.stringify(allRecords));
+            closeModal('apiConfigModal');
+            populateDynamicDropdowns();
+            applyFilters();
+            showNotification("Zenginleştirilmiş örnek eğitim verisi yüklendi.");
+        }
+
+        // GENERATE RICH SEED DATA WITH FULL DETAILS
+        function generateRichSeedRecords() {
+            const trainers = ["Semra Türkmen", "Gamze Güneş", "Erhan Yücel", "Hülya Yalçın", "Aydan Baş"];
+            const projects = ["AJet", "Türk Hava Yolları", "Sompo Sigorta", "Sigortam.net", "Vodafone", "Trendyol"];
+            const locations = [
+                "İstanbul (Flat Ofis)", "İstanbul (Nida Kule)", "Gümüşhane",
+                "Balıkesir", "Adana", "İzmir", "Diyarbakır"
+            ];
+            const trainingTypes = [
+                "Oryantasyon & BG ve İletişim Teknikleri",
+                "Oryantasyon & BG",
+                "İletişim Teknikleri",
+                "Müşteri Deneyimi & Kalite",
+                "Zor Durum Yönetimi"
+            ];
+
+            const dates = [
+                "01.09.2026", "03.09.2026", "07.09.2026", "10.09.2026",
+                "15.09.2026", "18.09.2026", "22.09.2026", "25.09.2026"
+            ];
+
+            const sampleParticipants = [
+                "Ali Yılmaz", "Ayşe Kaya", "Mehmet Demir", "Fatma Çelik", "Burak Şahin",
+                "Zeynep Koç", "Emre Aydın", "Elif Arslan", "Caner Polat", "Gizem Yıldız",
+                "Mustafa Öztürk", "Dilek Aksoy", "Hakan Kılıç", "Selin Erdoğan", "Murat Doğan",
+                "Büşra Kara", "Deniz Şimşek", "Oğuzhan Bulut", "Ebru Bozkurt", "Kemal Yavuz"
+            ];
+
+            const records = [];
+            let counter = 1;
+
+            trainers.forEach((trainer, tIdx) => {
+                const trainerDates = [dates[tIdx % dates.length], dates[(tIdx + 2) % dates.length], dates[(tIdx + 4) % dates.length]];
+
+                trainerDates.forEach((date, dIdx) => {
+                    const project = projects[(tIdx + dIdx) % projects.length];
+                    const location = locations[(tIdx + dIdx * 2) % locations.length];
+                    const trainingType = trainingTypes[(tIdx + dIdx) % trainingTypes.length];
+
+                    // Generate a batch of participants for this specific session
+                    const classSize = 5 + ((tIdx + dIdx) % 4);
+                    for (let p = 0; p < classSize; p++) {
+                        const name = sampleParticipants[(counter + p) % sampleParticipants.length] + ` (${counter})`;
+                        records.push({
+                            id: `REC-${counter++}`,
+                            participant: name,
+                            trainer: trainer,
+                            trainingType: trainingType,
+                            project: project,
+                            location: location,
+                            contract: (counter % 3 === 0) ? "İşkur" : "Bordro",
+                            date: date
+                        });
+                    }
+                });
+            });
+
+            return records;
+        }
+
+        // DYNAMIC DROPDOWN POPULATOR (DISCOVERS ALL VALUES DYNAMICALLY)
+        function populateDynamicDropdowns() {
+            const getUnique = (key) => [...new Set(allRecords.map(r => r[key]).filter(Boolean))].sort();
+
+            populateSelect('filterProject', getUnique('project'), 'Tüm Projeler');
+            populateSelect('filterLocation', getUnique('location'), 'Tüm Lokasyonlar');
+            populateSelect('filterTrainer', getUnique('trainer'), 'Tüm Eğitmenler');
+            populateSelect('filterTrainingType', getUnique('trainingType'), 'Tüm Eğitimler');
+            populateSelect('filterContract', getUnique('contract'), 'Tüm Kadrolar');
+            populateSelect('filterDate', getUnique('date'), 'Tüm Tarihler');
+        }
+
+        function populateSelect(id, items, defaultLabel) {
+            const select = document.getElementById(id);
+            if (!select) return;
+            const currentVal = select.value;
+            select.innerHTML = `<option value="ALL">${defaultLabel}</option>`;
+            items.forEach(item => {
+                const opt = document.createElement('option');
+                opt.value = item;
+                opt.textContent = item;
+                select.appendChild(opt);
+            });
+            if (items.includes(currentVal)) select.value = currentVal;
+        }
+
+        // TAB SWITCHER
+        function switchTab(tabId) {
+            const sections = ['overview', 'sessions', 'trainers', 'projects', 'participants', 'executive'];
+            sections.forEach(s => {
+                const sec = document.getElementById(`sec-${s}`);
+                const nav = document.getElementById(`nav-${s}`);
+                if (sec && nav) {
+                    if (s === tabId) {
+                        sec.classList.remove('hidden');
+                        nav.classList.add('active');
+                    } else {
+                        sec.classList.add('hidden');
+                        nav.classList.remove('active');
+                    }
+                }
+            });
+
+            const titles = {
+                'overview': 'Genel Bakış & KPI Metrikleri',
+                'sessions': 'Eğitmen & Tarih Bazlı Oturum Karnesi',
+                'trainers': 'Eğitmen Performans Matrisi',
+                'projects': 'Proje & Kampüs Dağılımı',
+                'participants': 'Tüm Katılımcılar & Detaylı Veri Listesi',
+                'executive': 'Yönetici Rapor Özeti'
+            };
+
+            const titleEl = document.getElementById('panelSectionTitle');
+            if (titleEl && titles[tabId]) titleEl.textContent = titles[tabId];
+
+            if (tabId === 'overview' || tabId === 'projects') {
+                renderCharts();
+            }
+        }
+
+        // FILTER ENGINE
+        function applyFilters() {
+            const p = document.getElementById('filterProject')?.value || 'ALL';
+            const l = document.getElementById('filterLocation')?.value || 'ALL';
+            const t = document.getElementById('filterTrainer')?.value || 'ALL';
+            const tt = document.getElementById('filterTrainingType')?.value || 'ALL';
+            const c = document.getElementById('filterContract')?.value || 'ALL';
+            const d = document.getElementById('filterDate')?.value || 'ALL';
+            const search = document.getElementById('globalSearchInput')?.value.toLowerCase().trim() || "";
+
+            filteredRecords = allRecords.filter(r => {
+                if (p !== 'ALL' && r.project !== p) return false;
+                if (l !== 'ALL' && r.location !== l) return false;
+                if (t !== 'ALL' && r.trainer !== t) return false;
+                if (tt !== 'ALL' && r.trainingType !== tt) return false;
+                if (c !== 'ALL' && r.contract !== c) return false;
+                if (d !== 'ALL' && r.date !== d) return false;
+
+                if (search) {
+                    const match = r.participant.toLowerCase().includes(search) ||
+                                  r.trainer.toLowerCase().includes(search) ||
+                                  r.project.toLowerCase().includes(search) ||
+                                  r.location.toLowerCase().includes(search) ||
+                                  r.trainingType.toLowerCase().includes(search) ||
+                                  r.date.toLowerCase().includes(search);
+                    if (!match) return false;
+                }
+                return true;
+            });
+
+            const badge = document.getElementById('recordCountBadge');
+            if (badge) badge.textContent = `${filteredRecords.length} Kayıt`;
+
+            renderKPIs();
+            renderSessionCards();
+            renderTrainerHighlightCards();
+            renderMatrixTable();
+            renderParticipantsTable();
+            renderExecutiveReport();
+            renderCharts();
+        }
+
+        function resetFilters() {
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.value = val;
+            };
+
+            setVal('filterProject', 'ALL');
+            setVal('filterLocation', 'ALL');
+            setVal('filterTrainer', 'ALL');
+            setVal('filterTrainingType', 'ALL');
+            setVal('filterContract', 'ALL');
+            setVal('filterDate', 'ALL');
+            setVal('globalSearchInput', '');
+
+            applyFilters();
+        }
+
+        // RENDER KPI STATS
+        function renderKPIs() {
+            const totalParticipants = filteredRecords.length;
+            const contractCounts = {};
+            filteredRecords.forEach(r => {
+                contractCounts[r.contract] = (contractCounts[r.contract] || 0) + 1;
+            });
+
+            const badgesContainer = document.getElementById('kpiContractBadges');
+            if (badgesContainer) {
+                badgesContainer.innerHTML = '';
+                Object.keys(contractCounts).forEach(cKey => {
+                    const span = document.createElement('span');
+                    span.className = "bg-tpmor-50 text-tpmor font-bold px-2 py-0.5 rounded-lg border border-tpmor-100 text-[10px]";
+                    span.textContent = `${cKey}: ${contractCounts[cKey]}`;
+                    badgesContainer.appendChild(span);
+                });
+            }
+
+            // A distinct session is identified by Trainer + Training Type + Date + Project
+            const sessionSet = new Set(filteredRecords.map(r => `${r.trainer}|${r.trainingType}|${r.date}|${r.project}`));
+            const totalSessions = sessionSet.size || (totalParticipants > 0 ? 1 : 0);
+            const activeTrainers = new Set(filteredRecords.map(r => r.trainer)).size;
+            const avgClassSize = totalSessions > 0 ? (totalParticipants / totalSessions).toFixed(1) : 0;
+
+            const setTxt = (id, txt) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = txt;
+            };
+
+            setTxt('kpiTotalParticipants', totalParticipants);
+            setTxt('kpiTotalSessions', totalSessions);
+            setTxt('kpiActiveTrainers', activeTrainers);
+            setTxt('kpiAvgClassSize', avgClassSize);
+        }
+
+        // RENDER SESSIONS & PARTICIPANT CARDS (KEY USER REQUIREMENT)
+        function renderSessionCards() {
+            const container = document.getElementById('sessionCardsContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            // Group records by Session (Trainer + Date + Training Type + Project + Location)
+            const sessionMap = new Map();
+            filteredRecords.forEach(r => {
+                const sessionKey = `${r.trainer}|${r.date}|${r.trainingType}|${r.project}|${r.location}`;
+                if (!sessionMap.has(sessionKey)) {
+                    sessionMap.set(sessionKey, {
+                        trainer: r.trainer,
+                        date: r.date,
+                        trainingType: r.trainingType,
+                        project: r.project,
+                        location: r.location,
+                        participants: []
+                    });
+                }
+                sessionMap.get(sessionKey).participants.push({
+                    name: r.participant,
+                    contract: r.contract
+                });
+            });
+
+            const sessionCountBadge = document.getElementById('sessionCountBadge');
+            if (sessionCountBadge) sessionCountBadge.textContent = `${sessionMap.size} Eğitim Oturumu`;
+
+            if (sessionMap.size === 0) {
+                container.innerHTML = `<div class="col-span-full p-8 text-center text-tpgri text-xs">Filtrelere uygun eğitim oturumu bulunamadı.</div>`;
+                return;
+            }
+
+            sessionMap.forEach(session => {
+                const card = document.createElement('div');
+                card.className = "bg-slate-50/70 border border-slate-200 rounded-2xl p-5 hover:border-tppembe/60 hover:shadow-md transition space-y-3";
+
+                // Badges for participants preview
+                const participantsHtml = session.participants.map(p => `
+                    <span class="inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-md border border-slate-200 text-[11px] font-medium text-slate-700">
+                        <span class="w-1.5 h-1.5 rounded-full bg-tppembe"></span>
+                        <span>${p.name}</span>
+                        <span class="text-[9px] text-tpgri font-bold">(${p.contract})</span>
+                    </span>
+                `).join(' ');
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-2 border-b border-slate-200/70 pb-3">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-tpmor bg-tpmor-50 px-2 py-0.5 rounded-md border border-tpmor-100">
+                                ${session.trainingType}
+                            </span>
+                            <h4 class="font-bold text-slate-800 text-base mt-1 flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-tpmor text-lg">school</span>
+                                <span>${session.trainer}</span>
+                            </h4>
+                        </div>
+                        <div class="text-right shrink-0">
+                            <span class="bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1">
+                                <span class="material-symbols-outlined text-sm">calendar_today</span>
+                                <span>${session.date}</span>
+                            </span>
+                            <span class="text-[11px] font-extrabold text-tppembe block mt-1">${session.participants.length} Katılımcı</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs text-tpgri-700 pt-1">
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm text-tpmor">apartment</span>
+                            <span>Proje: <strong>${session.project}</strong></span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm text-tppembe">location_on</span>
+                            <span>Lokasyon: <strong>${session.location}</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-slate-200/60">
+                        <p class="text-[10px] font-bold text-tpgri uppercase tracking-wider mb-1.5">Bu Oturuma Katılanlar (${session.participants.length} Kişi):</p>
+                        <div class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto pr-1">
+                            ${participantsHtml}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // TRAINER HIGHLIGHT CARDS
+        function renderTrainerHighlightCards() {
+            const container = document.getElementById('trainerHighlightCards');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const trainers = [...new Set(filteredRecords.map(r => r.trainer))].sort();
+
+            trainers.forEach(trainer => {
+                const tRecs = filteredRecords.filter(r => r.trainer === trainer);
+                const count = tRecs.length;
+                const sessions = new Set(tRecs.map(r => `${r.trainingType}|${r.date}`)).size;
+                const initials = trainer.split(' ').map(n=>n[0]).join('').substring(0, 3).toUpperCase();
+
+                const card = document.createElement('div');
+                card.className = "bg-white p-4 rounded-2xl border border-slate-200 shadow-sm hover:border-tppembe transition cursor-pointer group";
+                card.onclick = () => openTrainerModal(trainer);
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="w-8 h-8 bg-tpmor-50 text-tpmor rounded-full flex items-center justify-center font-bold text-xs group-hover:bg-tppembe group-hover:text-white transition">
+                            ${initials || 'EĞ'}
+                        </div>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-lg">${sessions} Oturum</span>
+                    </div>
+                    <h4 class="font-bold text-slate-800 text-sm truncate group-hover:text-tpmor transition" title="${trainer}">${trainer}</h4>
+                    <p class="text-xs text-tpgri mt-1"><span class="font-black text-tpmor text-lg">${count}</span> Katılımcı</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // MATRIX TABLE
+        function renderMatrixTable() {
+            const tbody = document.getElementById('matrixTableBody');
+            const thead = document.getElementById('matrixTableHead');
+            if (!tbody || !thead) return;
+            tbody.innerHTML = '';
+            thead.innerHTML = '';
+
+            const trainers = [...new Set(filteredRecords.map(r => r.trainer))].sort();
+            const trainingTypes = [...new Set(allRecords.map(r => r.trainingType))].sort();
+
+            if (trainers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-tpgri">Kayıt bulunamadı.</td></tr>`;
+                return;
+            }
+
+            let headHtml = `<tr><th class="p-4">Eğitmen Adı</th>`;
+            trainingTypes.forEach(tt => {
+                headHtml += `<th class="p-4 text-center">${tt}</th>`;
+            });
+            headHtml += `
+                <th class="p-4 text-center bg-tpmor-50 text-tpmor">Toplam Oturum</th>
+                <th class="p-4 text-center bg-tppembe-50 text-tppembe">Toplam Katılımcı</th>
+            </tr>`;
+            thead.innerHTML = headHtml;
+
+            trainers.forEach(trainer => {
+                const tRecs = filteredRecords.filter(r => r.trainer === trainer);
+                let rowHtml = `<td class="p-4 font-bold text-slate-800 flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-tppembe shrink-0"></span>
+                    <span class="truncate cursor-pointer hover:underline" onclick="openTrainerModal('${trainer}')">${trainer}</span>
+                </td>`;
+
+                let totalTrainerSessions = 0;
+                let totalTrainerParticipants = 0;
+
+                trainingTypes.forEach(type => {
+                    const typeRecs = tRecs.filter(r => r.trainingType === type);
+                    const pCount = typeRecs.length;
+                    const sCount = new Set(typeRecs.map(r => r.date)).size;
+
+                    totalTrainerSessions += sCount;
+                    totalTrainerParticipants += pCount;
+
+                    rowHtml += `
+                        <td class="p-4 text-center">
+                            <span class="font-bold text-slate-800">${pCount}</span>
+                            <span class="text-[10px] text-tpgri block">${sCount} Sınıf</span>
+                        </td>
+                    `;
+                });
+
+                rowHtml += `
+                    <td class="p-4 text-center font-bold bg-tpmor-50/50 text-tpmor">${totalTrainerSessions}</td>
+                    <td class="p-4 text-center font-black bg-tppembe-50/50 text-tppembe text-base">${totalTrainerParticipants}</td>
+                `;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = rowHtml;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // PARTICIPANTS TABLE
+        function renderParticipantsTable() {
+            const tbody = document.getElementById('participantsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            if (filteredRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-tpgri">Filtrelere uygun katılımcı kaydı bulunamadı.</td></tr>`;
+                return;
+            }
+
+            filteredRecords.slice(0, 200).forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-semibold text-slate-800">${r.participant}</td>
+                    <td class="p-3 text-slate-700">${r.trainer}</td>
+                    <td class="p-3 font-bold text-tpmor">${r.trainingType}</td>
+                    <td class="p-3 text-slate-600 font-mono">${r.date}</td>
+                    <td class="p-3"><span class="bg-tpmor-50 text-tpmor font-bold px-2.5 py-0.5 rounded-lg border border-tpmor-100">${r.project}</span></td>
+                    <td class="p-3 text-slate-600">${r.location}</td>
+                    <td class="p-3">
+                        <span class="px-2.5 py-0.5 rounded-lg text-[10px] font-bold ${r.contract === 'İşkur' ? 'bg-tppembe-50 text-tppembe border border-tppembe-100' : 'bg-tpmor-50 text-tpmor border border-tpmor-100'}">
+                            ${r.contract}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // EXECUTIVE REPORT GENERATOR
+        function renderExecutiveReport() {
+            const container = document.getElementById('executiveReportContent');
+            if (!container) return;
+            const total = filteredRecords.length;
+
+            if (total === 0) {
+                container.innerHTML = `<p class="text-tpgri">Rapor üretilecek veri bulunamadı.</p>`;
+                return;
+            }
+
+            const trainers = [...new Set(filteredRecords.map(r => r.trainer))];
+            const topTrainerObj = trainers.map(t => ({ name: t, count: filteredRecords.filter(r => r.trainer === t).length }))
+                                          .sort((a,b) => b.count - a.count)[0];
+            const projects = [...new Set(filteredRecords.map(r => r.project))];
+            const locations = [...new Set(filteredRecords.map(r => r.location))];
+            const dates = [...new Set(filteredRecords.map(r => r.date))];
+
+            container.innerHTML = `
+                <p><strong>Sayın Yöneticim,</strong></p>
+                <p>Eğitim Analiz Portalı (EduPort) merkezi veri havuzu üzerinden çekilen anlık eğitim metrikleri aşağıda sunulmuştur:</p>
+                <ul class="list-disc pl-5 space-y-1.5">
+                    <li>İncelenen zaman diliminde sistemde kayıtlı <strong>toplam katılımcı sayısı ${total} kişidir</strong>.</li>
+                    <li>Süreçte aktif görev alan <strong>eğitmen sayısı ${trainers.length}</strong> olup, en yüksek katılımcı sayısına ulaşan eğitmen <strong>${topTrainerObj ? topTrainerObj.name : '-'}</strong> (${topTrainerObj ? topTrainerObj.count : 0} katılımcı) olmuştur.</li>
+                    <li>Eğitimler <strong>${dates.length} farklı tarihte</strong>, <strong>${projects.length} projede</strong> (${projects.slice(0, 4).join(', ')}) ve <strong>${locations.length} aktif kampüste</strong> (${locations.slice(0, 4).join(', ')}) kesintisiz yürütülmüştür.</li>
+                    <li>Sistem manuel dosya transferine ihtiyaç kalmaksızın merkezi Google E-Tablosu üzerinden 7/24 anlık beslenmektedir.</li>
+                </ul>
+                <p>Katılımcı ve oturum detaylarını ilgili sekmelerdeki tablolardan inceleyebilirsiniz.</p>
+            `;
+        }
+
+        // CHART RENDERING (THEMED WITH BRAND PALETTE)
+        function renderCharts() {
+            const initChart = (id, config) => {
+                if (chartInstances[id]) chartInstances[id].destroy();
+                const ctx = document.getElementById(id);
+                if (ctx) chartInstances[id] = new Chart(ctx, config);
+            };
+
+            // 1. Chart Trainers Overview
+            const trainers = [...new Set(filteredRecords.map(r => r.trainer))].sort();
+            const trainerCounts = trainers.map(t => filteredRecords.filter(r => r.trainer === t).length);
+            initChart('chartTrainersOverview', {
+                type: 'bar',
+                data: {
+                    labels: trainers.length > 0 ? trainers : ['Veri Yok'],
+                    datasets: [{
+                        label: 'Katılımcı Sayısı',
+                        data: trainerCounts.length > 0 ? trainerCounts : [0],
+                        backgroundColor: TP_COLORS.mor,
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // 2. Chart Training Types Overview
+            const types = [...new Set(filteredRecords.map(r => r.trainingType))].sort();
+            const typeCounts = types.map(tt => filteredRecords.filter(r => r.trainingType === tt).length);
+            initChart('chartTrainingTypesOverview', {
+                type: 'doughnut',
+                data: {
+                    labels: types.length > 0 ? types : ['Veri Yok'],
+                    datasets: [{
+                        data: typeCounts.length > 0 ? typeCounts : [1],
+                        backgroundColor: TP_COLORS.palette
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // 3. Chart Projects
+            const projects = [...new Set(filteredRecords.map(r => r.project))].sort();
+            const projCounts = projects.map(p => filteredRecords.filter(r => r.project === p).length);
+            initChart('chartProjects', {
+                type: 'bar',
+                data: {
+                    labels: projects.length > 0 ? projects : ['Veri Yok'],
+                    datasets: [{
+                        label: 'Katılımcı',
+                        data: projCounts.length > 0 ? projCounts : [0],
+                        backgroundColor: TP_COLORS.pembe,
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // 4. Chart Locations
+            const locations = [...new Set(filteredRecords.map(r => r.location))].sort();
+            const locCounts = locations.map(l => filteredRecords.filter(r => r.location === l).length);
+            initChart('chartLocations', {
+                type: 'pie',
+                data: {
+                    labels: locations.length > 0 ? locations : ['Veri Yok'],
+                    datasets: [{
+                        data: locCounts.length > 0 ? locCounts : [1],
+                        backgroundColor: TP_COLORS.palette
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // MODAL TOGGLERS
+        function openModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        }
+
+        // TRAINER DRILLDOWN INSPECTOR (SHOWS EVERY SESSION, DATE & PARTICIPANT ATTENDEES)
+        function openTrainerModal(trainerName) {
+            const nameEl = document.getElementById('modalTrainerName');
+            if (nameEl) nameEl.textContent = trainerName;
+
+            const tRecs = allRecords.filter(r => r.trainer === trainerName);
+            const totalP = tRecs.length;
+
+            // Group by Date & Training Type
+            const sessionMap = new Map();
+            tRecs.forEach(r => {
+                const sKey = `${r.date}|${r.trainingType}|${r.project}|${r.location}`;
+                if (!sessionMap.has(sKey)) {
+                    sessionMap.set(sKey, {
+                        date: r.date,
+                        trainingType: r.trainingType,
+                        project: r.project,
+                        location: r.location,
+                        participants: []
+                    });
+                }
+                sessionMap.get(sKey).participants.push(r.participant);
+            });
+
+            const body = document.getElementById('modalTrainerBody');
+            if (body) {
+                let sessionsHtml = '';
+                sessionMap.forEach(s => {
+                    sessionsHtml += `
+                        <div class="bg-slate-50 border border-slate-200 p-3 rounded-xl space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-tpmor text-xs">${s.trainingType}</span>
+                                <span class="bg-emerald-50 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded border border-emerald-200">${s.date}</span>
+                            </div>
+                            <p class="text-[11px] text-tpgri-700">Proje: <strong>${s.project}</strong> · Lokasyon: <strong>${s.location}</strong></p>
+                            <div class="pt-1">
+                                <p class="text-[10px] font-bold text-tpgri uppercase">Katılanlar (${s.participants.length} Kişi):</p>
+                                <p class="text-[11px] text-slate-700">${s.participants.join(', ')}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                body.innerHTML = `
+                    <div class="grid grid-cols-2 gap-3 pb-2">
+                        <div class="bg-tpmor-50 p-3 rounded-xl border border-tpmor-100">
+                            <span class="text-tpgri uppercase text-[10px] font-bold">Toplam Katılımcı</span>
+                            <p class="text-xl font-black text-tpmor">${totalP}</p>
+                        </div>
+                        <div class="bg-tppembe-50 p-3 rounded-xl border border-tppembe-100">
+                            <span class="text-tpgri uppercase text-[10px] font-bold">Açtığı Oturum</span>
+                            <p class="text-xl font-black text-tppembe">${sessionMap.size}</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <h4 class="font-bold text-slate-800 text-xs flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm text-tppembe">event_note</span>
+                            <span>Tarih Bazlı Eğitim Geçmişi:</span>
+                        </h4>
+                        ${sessionsHtml || '<p class="text-tpgri">Oturum kaydı bulunamadı.</p>'}
+                    </div>
+                `;
+            }
+
+            openModal('trainerModal');
+        }
+
+        // CSV EXPORTERS
+        function exportMatrixToCSV() {
+            let csv = 'Eğitmen,Eğitim Adı,Katılımcı Sayısı\n';
+            const trainers = [...new Set(filteredRecords.map(r => r.trainer))];
+            trainers.forEach(t => {
+                const recs = filteredRecords.filter(r => r.trainer === t);
+                csv += `"${t}","Tüm Eğitimler",${recs.length}\n`;
+            });
+            downloadCSV(csv, 'egitmen_performans_matrisi.csv');
+        }
+
+        function exportParticipantsToCSV() {
+            let csv = 'Katılımcı,Eğitmen,Eğitim Adı,Tarih,Proje,Lokasyon,Sözleşme\n';
+            filteredRecords.forEach(r => {
+                csv += `"${r.participant}","${r.trainer}","${r.trainingType}","${r.date}","${r.project}","${r.location}","${r.contract}"\n`;
+            });
+            downloadCSV(csv, 'katilimci_ve_egitim_listesi.csv');
+        }
+
+        function downloadCSV(csvContent, filename) {
+            const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute("download", filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function copyExecutiveReport() {
+            const text = document.getElementById('executiveReportContent')?.innerText;
+            if (text) {
+                document.execCommand('copy');
+                showNotification("Rapor metni panoya kopyalandı!");
+            }
+        }
+
+        function updateSyncTimestamp() {
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0];
+            const el = document.getElementById('lastSyncTime');
+            if (el) el.textContent = timeStr;
+        }
+
+        function showNotification(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-5 right-5 bg-tpmor-950 text-white text-xs px-4 py-3 rounded-xl shadow-2xl z-50 flex items-center space-x-2 border border-tpmor-700 animate-bounce";
+            toast.innerHTML = `<span class="material-symbols-outlined text-emerald-400 text-base">check_circle</span> <span>${msg}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                if (toast.parentNode) toast.parentNode.removeChild(toast);
+            }, 3500);
+        }
+
+        // INITIALIZE ON LOAD + AUTO-REFRESH EVERY 60 SECONDS
+        window.onload = function() {
+            if (activeCloudUrl) {
+                document.getElementById('cloudApiUrlInput').value = activeCloudUrl;
+            }
+
+            // Fetch live data immediately
+            fetchCloudData(false);
+
+            // Auto-refresh quietly every 60 seconds
+            setInterval(() => {
+                fetchCloudData(false);
+            }, 60000);
+        };
+    </script>
+</body>
+</html>
